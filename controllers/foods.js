@@ -25,14 +25,19 @@ exports.getFoods = async (req, res, next) => {
  * @access    public
  */
 exports.getFood = async (req, res, next) => {
-    const food = await Food.findById(req.params.id);
-    if (!food) {
-        return next(new ErrorResponse(`Food with the id of ${req.params.id}`));
+    try {
+        const food = await Food.findById(req.params.id);
+        if (!food) {
+            return next(new ErrorResponse(`Food with the id of ${req.params.id}`, 404));
+        }
+        res.status(200).json({
+            success: true,
+            data: food
+        });
+    } catch (error) {
+        return next(new ErrorResponse(`Food with the id of ${req.params.id}`, 404));
     }
-    res.status(200).json({
-        success: true,
-        data: food
-    });
+
 };
 
 /**
@@ -42,11 +47,15 @@ exports.getFood = async (req, res, next) => {
  * @access    public
  */
 exports.createFood = async (req, res, next) => {
-    const food = await Food.create(req.body);
-    res.status(201).json({
-        success: true,
-        data: food
-    });
+    try {
+        const food = await Food.create(req.body);
+        res.status(201).json({
+            success: true,
+            data: food
+        });
+    } catch (err) {
+        return next(new ErrorResponse('Unable to create registry', 404))
+    }
 };
 
 /**
@@ -56,14 +65,18 @@ exports.createFood = async (req, res, next) => {
  * @access    public
  */
 exports.updateFood = async (req, res, next) => {
-    const food = await Food.findByIdAndUpdate(req.params.id, req.body);
-    res.status(200).json({
-        success: true,
-        data: {
-            updated: true,
-            food
-        }
-    });
+    try {
+        const food = await Food.findByIdAndUpdate(req.params.id, req.body);
+        res.status(200).json({
+            success: true,
+            data: {
+                updated: true,
+                food
+            }
+        });
+    } catch (err) {
+        return next(new ErrorResponse('Unable to update registry', 404))
+    }
 };
 
 /**
@@ -73,9 +86,13 @@ exports.updateFood = async (req, res, next) => {
  * @access    public
  */
 exports.deleteFood = async (req, res, next) => {
-    const food = await Food.findByIdAndDelete(req.params.id);
-    res.status(200).json({
-        success: true,
-        data: {}
-    });
+    try {
+        const food = await Food.findByIdAndDelete(req.params.id);
+        res.status(200).json({
+            success: true,
+            data: {}
+        });
+    } catch (err) {
+        return next(new ErrorResponse('Unable to delete registry', 404))
+    }
 };
